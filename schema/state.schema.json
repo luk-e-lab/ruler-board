@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ruler/state.schema.json",
+  "title": "Ruler 상태 (GET /api/state)",
+  "description": "계약 v1.0. 리듀서가 모든 로그 조각에서 계산. 필드 추가는 자유, 삭제·의미 변경은 계약 변경.",
+  "type": "object",
+  "required": ["projects", "sessions", "agents", "accounts", "pcs", "edges", "feed", "last"],
+  "$defs": {
+    "st": { "enum": ["wait", "doing", "done", "blocked", "approval"] },
+    "time": { "type": ["string", "null"], "format": "date-time" },
+    "minor": {
+      "type": "object", "required": ["id", "title", "st"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^M\\d+\\.\\d+$" }, "title": { "type": "string" },
+        "st": { "enum": ["wait", "doing", "done", "blocked", "approval", "dropped"] },
+        "agent": { "type": "string" }, "account": { "type": "string" }, "session": { "type": "string" },
+        "note": { "type": "string" }, "auto": { "type": "boolean" }, "added": { "$ref": "#/$defs/time" }, "at": { "$ref": "#/$defs/time" }
+      }
+    },
+    "major": {
+      "type": "object", "required": ["id", "title", "st", "minors", "total", "done", "grew"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^M\\d+$" }, "title": { "type": "string" }, "st": { "$ref": "#/$defs/st" },
+        "minors": { "type": "array", "items": { "$ref": "#/$defs/minor" } },
+        "total": { "type": "integer" }, "done": { "type": "integer" }, "grew": { "type": "integer" },
+        "agent": { "type": ["string", "null"] }, "account": { "type": "string" }, "doneAt": { "$ref": "#/$defs/time" }
+      }
+    },
+    "approval": {
+      "type": "object", "required": ["id", "kind", "text", "st"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^A\\d+$" }, "kind": { "enum": ["plan", "ask"] }, "text": { "type": "string" },
+        "st": { "enum": ["pending", "ok", "no"] }, "majors": { "type": "array", "items": { "type": "string" } },
+        "target": { "type": ["string", "null"] }, "agent": { "type": "string" }, "account": { "type": "string" }, "session": { "type": "string" },
+        "by": { "type": "string" }, "note": { "type": "string" }, "t": { "$ref": "#/$defs/time" }, "decidedAt": { "$ref": "#/$defs/time" }
+      }
+    }
+  },
+  "properties": {
+    "projects": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object", "required": ["id", "majors", "approvals", "pending"],
+        "properties": {
+          "id": { "type": "string" },
+          "majors": { "type": "array", "items": { "$ref": "#/$defs/major" } },
+          "approvals": { "type": "array", "items": { "$ref": "#/$defs/approval" } },
+          "pending": { "type": "integer" }, "cur": { "type": ["string", "null"] },
+          "updated": { "$ref": "#/$defs/time" }, "proposed": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "sessions": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object", "required": ["id"],
+        "properties": {
+          "id": { "type": "string" }, "account": { "type": "string" }, "pc": { "type": "string" }, "agent": { "type": "string" },
+          "project": { "type": "string" }, "major": { "type": "string" }, "cwd": { "type": "string" },
+          "plan": { "type": "array", "items": { "type": "object", "properties": { "title": { "type": "string" }, "st": { "$ref": "#/$defs/st" } } } }
+        }
+      }
+    },
+    "agents": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object", "required": ["name", "seen"],
+        "properties": {
+          "name": { "type": "string" }, "account": { "type": "string" }, "pc": { "type": ["string", "null"] }, "seen": { "$ref": "#/$defs/time" },
+          "tool": { "type": ["string", "null"] }, "project": { "type": ["string", "null"] }, "sessions": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "accounts": {
+      "type": "object",
+      "additionalProperties": { "type": "object", "required": ["id", "name"], "properties": { "id": { "type": "string" }, "name": { "type": "string" }, "seen": { "$ref": "#/$defs/time" } } }
+    },
+    "pcs": { "type": "array", "items": { "type": "string" } },
+    "edges": {
+      "type": "array",
+      "items": { "type": "object", "required": ["from", "to", "t", "via"], "properties": { "from": { "type": "string" }, "to": { "type": "string" }, "note": { "type": "string" }, "t": { "$ref": "#/$defs/time" }, "via": { "type": "string" }, "account": { "type": "string" } } }
+    },
+    "feed": {
+      "type": "array", "maxItems": 200,
+      "items": { "type": "object", "required": ["k", "t", "who", "notes"], "properties": { "who": { "type": "string" }, "notes": { "type": "array", "items": { "type": "object", "required": ["kind", "p", "id"], "properties": { "kind": { "enum": ["major_done", "blocked", "approval"] } } } } } }
+    },
+    "last": { "$ref": "#/$defs/time" }
+  }
+}

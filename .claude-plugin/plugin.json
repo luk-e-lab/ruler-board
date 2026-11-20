@@ -1,0 +1,27 @@
+{
+  "name": "ruler-board",
+  "version": "1.0.0",
+  "description": "두 단계 눈금(큰 눈금·작은 눈금) 진행판 — MCP 도구 8개 + 훅 + 로컬 웹 진행판. 의존성 없음(node만)",
+  "author": {
+    "name": "luk-e-lab",
+    "url": "https://github.com/luk-e-lab"
+  },
+  "license": "MIT",
+  "keywords": [
+    "progress",
+    "board",
+    "mcp",
+    "hooks"
+  ],
+  "mcpServers": {
+    "ruler": {
+      "command": "node",
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/server/mcp.js"
+      ]
+    }
+  },
+  "homepage": "https://github.com/luk-e-lab/ruler-board",
+  "repository": "https://github.com/luk-e-lab/ruler-board",
+  "icon": ".claude-plugin/icon.png"
+}

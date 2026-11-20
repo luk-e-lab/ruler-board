@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ruler Board</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>Ruler Board</h1>
+  <select id="project" aria-label="프로젝트"></select>
+  <select id="acct" aria-label="계정" hidden><option value="">전체 계정</option></select>
+  <a id="pending" class="pending" href="#approvals" hidden></a>
+  <span id="live" class="live">연결 중…</span>
+  <button id="theme" type="button" title="화면 테마 바꾸기">자동</button>
+</header>
+<main id="blocks"></main>
+<script src="app.js"></script>
+</body>
+</html>

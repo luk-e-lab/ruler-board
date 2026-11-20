@@ -1,0 +1,15 @@
+{
+  "name": "ruler-board",
+  "description": "Ruler Board — 두 단계 눈금 진행판 플러그인",
+  "owner": {
+    "name": "luk-e-lab",
+    "url": "https://github.com/luk-e-lab"
+  },
+  "plugins": [
+    {
+      "name": "ruler-board",
+      "source": "./",
+      "description": "두 단계 눈금 진행판 — MCP 도구 + 훅 + 로컬 웹 진행판"
+    }
+  ]
+}
