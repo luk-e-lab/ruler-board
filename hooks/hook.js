@@ -57,6 +57,7 @@ try {
   const h = JSON.parse(fs.readFileSync(0, 'utf8'));
   if (!process.env.CLAUDE_CODE_HOST_SESSION_ID && !process.env.CLAUDE_CODE_SESSION_ID && h.session_id) process.env.CLAUDE_CODE_SESSION_ID = h.session_id;
   store = require('../server/store');
+  if (store.muted()) process.exit(0); // 이 계정은 꺼 둠(config only/off): 아무것도 안 씀
   for (const e of events(h)) store.append(e);
   deliver(store, h.hook_event_name);
 } catch (e) {

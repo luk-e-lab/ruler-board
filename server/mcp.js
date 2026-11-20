@@ -16,7 +16,7 @@ function handle(msg) {
     if (method === 'initialize') return send({ jsonrpc: '2.0', id, result: {
       protocolVersion: (params && params.protocolVersion) || '2025-06-18',
       capabilities: { tools: {} },
-      serverInfo: { name: 'ruler', version: '1.0.0' },
+      serverInfo: { name: 'ruler', version: '1.1.0' },
       instructions: '두 단계 눈금 진행판. 큰 일은 ruler_plan으로 큰 눈금 제안(사용자 승인) → ruler_split으로 작은 눈금 → ruler_tick. 막히면 blocked, 결정이 필요하면 ruler_ask. project를 생략하면 현재 폴더 이름. ruler_bind는 선택(이름·맡은 큰 눈금). 진행판 주소는 ruler_status 첫 줄(포트는 비어 있는 것을 자동으로 고름).',
     } });
     if (method === 'tools/list') return send({ jsonrpc: '2.0', id, result: { tools: TOOLS } });

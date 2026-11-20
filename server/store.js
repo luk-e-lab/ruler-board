@@ -305,4 +305,23 @@ function writeBoard(port) { fs.mkdirSync(HOME, { recursive: true }); fs.writeFil
 function clearBoard(port) { try { if (readJson(BOARD).port === port && readJson(BOARD).pid === process.pid) fs.unlinkSync(BOARD); } catch {} }
 const boardUrl = () => { const p = boardPort(); return p ? `http://127.0.0.1:${p}` : null; };
 
-module.exports = { HOME, DEFAULT_DIR, CONFIG, PC, PORT, LOG, MARK, shortId, accountName, identity, append, readEvents, etag, reduce, state, summary, boardPort, boardUrl, writeBoard, clearBoard };
+// ---------- 계정별 켜고 끄기 ----------
+// config "only": [...] 이면 그 계정들만 기록, "off": [...] 이면 그 계정들은 기록 안 함. 항목은 별명·짧은 id·계정 UUID.
+// 설정 파일을 매번 다시 읽으므로 고치면 열린 세션에도 바로 적용된다.
+function liveConfig() {
+  const l = readJson(path.join(DEFAULT_DIR, 'config.json'));
+  const s = HOME === path.resolve(DEFAULT_DIR) ? {} : readJson(path.join(HOME, 'config.json'));
+  return { ...s, ...l, accounts: { ...s.accounts, ...l.accounts } };
+}
+function muted(id = identity().account) {
+  const c = liveConfig();
+  const alias = (Object.entries(c.accounts || {}).find(([k]) => k === id || shortId(k) === id) || [])[1];
+  const names = [id, alias, accountName(id)].filter(Boolean).map(String);
+  const hit = (list) => Array.isArray(list) && list.some((x) => names.includes(String(x)) || shortId(String(x)) === id);
+  if (Array.isArray(c.only) && c.only.length) return !hit(c.only);
+  return hit(c.off);
+}
+// 사람이 읽는 현재 계정: "개인 (ab12cd34)"
+const whoAmI = () => { const id = identity().account; const n = accountName(id); return n === id ? id : `${n} (${id})`; };
+
+module.exports = { HOME, DEFAULT_DIR, CONFIG, PC, PORT, LOG, MARK, shortId, accountName, identity, append, readEvents, etag, reduce, state, summary, boardPort, boardUrl, writeBoard, clearBoard, muted, whoAmI };

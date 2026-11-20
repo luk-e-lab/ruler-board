@@ -30,7 +30,7 @@ function server(env, cwd) {
   const proj = path.join(T, 'myproj'); fs.mkdirSync(proj);
   const solo = server({}, proj);
   const init = await solo.rpc('initialize', { protocolVersion: '2025-06-18', capabilities: {}, clientInfo: { name: 't', version: '0' } });
-  assert.equal(init.result.serverInfo.version, '1.0.0');
+  assert.equal(init.result.serverInfo.version, require('../package.json').version);
   assert.equal((await solo.rpc('tools/list', {})).result.tools.length, 8);
   assert.match(await solo.t('ruler_plan', { majors: ['가', '나'] }), /^A1 승인대기 \(myproj\)/);
   await solo.t('ruler_decide', { id: 'A1', ok: true });
@@ -128,6 +128,27 @@ function server(env, cwd) {
   foreign.close();
   console.log(`⑥ 포트 ok — 남의 ${FP} 비켜 ${BP}, 다른 폴더 ${board(H6b).port}, 끝난 세션 이어받음`);
   void S3;
+
+  // ⑦ 계정별 켜고 끄기: config off/only. 설정을 매번 읽으므로 고치면 열린 세션에도 바로 적용
+  const H7 = path.join(T, 'h7');
+  const cfg7 = (extra) => fs.writeFileSync(path.join(DEF, 'config.json'), JSON.stringify({ accounts: { 'uuid-a': '개인', 'uuid-b': '회사' }, ...extra }));
+  const env7 = (u, s) => ({ RULER_HOME: H7, RULER_PC: 'p7', CLAUDE_CODE_ACCOUNT_UUID: u, CLAUDE_CODE_HOST_SESSION_ID: s });
+  const log7 = () => { const f = path.join(H7, 'events', 'p7.jsonl'); return fs.existsSync(f) ? lines(f) : []; };
+  const hook7 = (u, s) => require('child_process').spawnSync(process.execPath, [path.join(__dirname, '..', 'hooks', 'hook.js')], { env: { ...base, ...env7(u, s) }, input: JSON.stringify({ hook_event_name: 'PostToolUse', tool_name: 'Read', tool_input: {}, session_id: 'x' }) });
+  cfg7({ off: ['회사'] });
+  const A7 = server(env7('uuid-a', 'local_a7'), proj), B7 = server(env7('uuid-b', 'local_b7'), proj);
+  await A7.t('ruler_plan', { majors: ['가'] });
+  assert.match(await B7.t('ruler_plan', { majors: ['나'] }), /^이 계정\(회사 \([0-9a-f]{8}\)\)은 ruler 꺼짐/);
+  hook7('uuid-b', 'local_b7'); hook7('uuid-a', 'local_a7');
+  assert.deepEqual(log7().map((e) => e.account), [sha8('uuid-a'), sha8('uuid-a')], 'off 계정이 기록됨');
+  assert.match(await B7.t('ruler_status', {}), /지금 계정 회사 \([0-9a-f]{8}\)\n이 계정\(회사/);
+  cfg7({ only: ['회사'] }); // 재시작 없이 바꿈 → 이제 개인이 꺼지고 회사가 켜짐
+  assert.match(await A7.t('ruler_tick', { id: 'M1', st: 'doing' }), /개인 .*꺼짐/);
+  await B7.t('ruler_ask', { text: 'y' });
+  hook7('uuid-a', 'local_a7');
+  assert.deepEqual(log7().map((e) => e.account), [sha8('uuid-a'), sha8('uuid-a'), sha8('uuid-b')]);
+  fs.rmSync(path.join(DEF, 'config.json'));
+  console.log('⑦ 계정별 off/only ok — 바로 적용');
 
   for (const cp of procs) cp.kill();
   setTimeout(() => { try { fs.rmSync(T, { recursive: true, force: true }); } catch {} console.log('smoke ok'); }, 200);

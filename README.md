@@ -35,6 +35,8 @@ claude plugin install ruler-board@ruler-board
 
 ## 쓰는 사람별 설정
 
+**한 계정에서만 쓰고 싶으면** 설정에 `"only": ["개인"]`(또는 `"off": ["회사"]`)을 넣습니다. 플러그인은 PC 단위로 켜지므로 계정별로 끄려면 이 설정을 씁니다. 설정 파일은 매번 다시 읽어서 고치면 열린 세션에도 바로 적용되고, 지금 계정이 무엇인지는 `ruler_status` 첫 줄에 나옵니다.
+
 | 경우 | 할 일 |
 |---|---|
 | 계정 하나, PC 하나 | 아무것도 안 함. 데이터는 `%APPDATA%\ruler`(Windows) 또는 `~/.config/ruler` |
@@ -62,6 +64,8 @@ claude plugin install ruler-board@ruler-board
 | `pc` | 이 PC 이름(로그 조각 파일 이름). `RULER_PC`가 우선 | 컴퓨터 이름 |
 | `port` | 진행판 선호 포트. 쓰이고 있으면 다음 빈 포트로. `RULER_PORT`가 우선 | `47810` |
 | `accounts` | 계정 별명. 키는 `CLAUDE_CODE_ACCOUNT_UUID` 또는 진행판에 보이는 짧은 id(8자리) | `계정 ab12` |
+| `only` | 이 계정들만 기록(별명·짧은 id·UUID 목록). 나머지 계정은 꺼짐 | 없음(전부 기록) |
+| `off` | 이 계정들은 기록 안 함. `only`가 있으면 `only`가 우선 | 없음 |
 
 `home`을 옮겼다면 `<home>/config.json`도 읽습니다. 여러 PC가 같이 쓸 별명은 거기 두면 됩니다.
 

@@ -80,10 +80,13 @@ function othersHere(st, session, P) {
 function call(name, args) {
   args = args || {};
   if (args.agent) mem.agent = args.agent;
+  const off = store.muted();
+  const offMsg = `이 계정(${store.whoAmI()})은 ruler 꺼짐 — 기록하지 않음(config.json의 only/off)`;
+  if (off && name !== 'ruler_status') return offMsg;
   if (name === 'ruler_status') {
     const st = store.state();
     const url = store.boardUrl();
-    const head = url ? `진행판 ${url}\n` : '진행판 꺼짐(MCP 세션이 뜨면 켜짐)\n';
+    const head = (url ? `진행판 ${url}` : '진행판 꺼짐(MCP 세션이 뜨면 켜짐)') + ` · 지금 계정 ${store.whoAmI()}\n` + (off ? offMsg + '\n' : '');
     if (args.account) return head + accountSummary(st, resolveAccount(st, args.account), args.project || null, args.all);
     const id = args.project || mem.project || mySessionProject() || folderProject();
     if (st.projects[id]) return head + store.summary(st.projects[id], args.all);
